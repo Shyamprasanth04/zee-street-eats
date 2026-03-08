@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .image-info { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .warning { color: orange; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Image Verification</h1>
+    <div id="results"></div>
+
+    <script>
+        const images = [
+            'taco-titan.jpg',
+            'bao-boss.jpg',
+            'fry-fiend.jpg',
+            'jerk-junkie.jpg'
+        ];
+
+        function verifyImage(imageName) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    resolve({
+                        name: imageName,
+                        width: img.width,
+                        height: img.height,
+                        naturalWidth: img.naturalWidth,
+                        naturalHeight: img.naturalHeight
+                    });
+                };
+                img.onerror = () => {
+                    resolve({
+                        name: imageName,
+                        error: 'Failed to load image'
+                    });
+                };
+                img.src = `/images/${imageName}`;
+            });
+        }
+
+        async function verifyAllImages() {
+            const results = document.getElementById('results');
+            
+            for (const image of images) {
+                const info = await verifyImage(image);
+                const div = document.createElement('div');
+                div.className = 'image-info';
+                
+                if (info.error) {
+                    div.innerHTML = `<h2>${info.name}</h2><p class="error">${info.error}</p>`;
+                } else {
+                    let warnings = [];
+                    if (info.width < 800 || info.height < 800) {
+                        warnings.push('Image is smaller than recommended 800x800px');
+                    }
+                    
+                    div.innerHTML = `
+                        <h2>${info.name}</h2>
+                        <p>Dimensions: ${info.width}x${info.height}</p>
+                        <p>Natural Dimensions: ${info.naturalWidth}x${info.naturalHeight}</p>
+                        ${warnings.map(w => `<p class="warning">⚠️ ${w}</p>`).join('')}
+                    `;
+                }
+                
+                results.appendChild(div);
+            }
+        }
+
+        verifyAllImages();
+    </script>
+</body>
+</html> 
